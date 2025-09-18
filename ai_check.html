@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>AI Detection Analysis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
+    <style>
+        body { background-color: #f8f9fa; }
+        .ai-detection-chart-section {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 900px;
+        }
+        .profile-photo {
+            width: 120px; /* Increased size */
+            height: 120px; /* Increased size */
+            object-fit: cover;
+            border-radius: 0.5rem; /* Changed to square shape */
+            border: 4px solid #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 1rem;
+        }
+        .chart-container { margin-bottom: 2rem; }
+        .bar-graph-section {
+            background: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 8px 20px #0001;
+            padding: 2rem 0;
+            margin-bottom: 1.5rem;
+        }
+        .chart-title { text-align: center; color: #0d6efd; margin-bottom: 2rem; }
+        .bar-graph {
+            display: flex;
+            justify-content: center; /* Adjusted to bring bars closer */
+            align-items: flex-end;
+            gap: 20px; /* Reduced gap */
+            height: 250px; /* Increased height */
+        }
+        .bar-container { width: 80px; display: flex; flex-direction: column; align-items: center; }
+        .bar {
+            width: 100%;
+            border-radius: 0.5rem 0.5rem 0 0;
+            box-shadow: 0 -2px 8px #0003;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            transition: height 0.5s;
+            font-weight: bold;
+            color: #fff;
+            font-size: 1rem;
+        }
+        .bar.human { background: #28a745; }
+        .bar.ai { background: #dc3545; }
+        .bar-label { font-weight: 600; color: #444; margin-top: 6px; }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 2rem;}
+        .feature-card { background: white; border: 1px solid #dee2e6; border-radius: 0.5rem; padding: 1rem;}
+        .feature-title { font-weight: 600; color: #495057; margin-bottom: 0.5rem;}
+        .feature-value { font-size: 1.1rem; font-weight: bold; color: #007bff; }
+        .confidence-section { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px dashed #dee2e6; text-align: center;}
+        .confidence-score { font-size: 1.8rem; font-weight: bold; color: #198754;}
+        .confidence-title { font-weight: 600; color: #212529;}
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-brain me-2"></i>AI Resume Analyzer
+            </a>
+            <div class="navbar-nav ms-auto">
+                <button class="btn btn-outline-light" onclick="window.close()">
+                    <i class="fas fa-times me-2"></i>Close Window
+                </button>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="ai-detection-chart-section">
+            <div class="header text-center mb-4">
+                <img src="https://www.digital-science.com/wp-content/uploads/2024/02/ai-academic-writing-research-stock-image-1.jpg" alt="Profile Photo" class="profile-photo">
+                <h1><i class="fas fa-robot me-3"></i>AI Detection Analysis</h1>
+                <h3 class="text-muted">{{ analysis.candidate_name }}</h3>
+                <p class="text-muted mb-0">Resume: {{ analysis.resume_filename }}</p>
+            </div>
+            <div class="chart-container">
+                <div class="bar-graph-section">
+                    <div class="chart-title">AI vs Human Content Detection</div>
+                    <div class="bar-graph">
+                        <div class="bar-container">
+                            <div class="bar human" id="humanBar" style="height: {{ analysis.human_percentage * 2 }}px;">
+                                {{ analysis.human_percentage }}%
+                            </div>
+                            <div class="bar-label">Human</div>
+                        </div>
+                        <div class="bar-container">
+                            <div class="bar ai" id="aiBar" style="height: {{ analysis.ai_percentage * 2 }}px;">
+                                {{ analysis.ai_percentage }}%
+                            </div>
+                            <div class="bar-label">AI</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="confidence-section">
+                    <div class="confidence-title">AI Confidence — How much AI is present</div>
+                    <div class="confidence-score">{{ analysis.ai_confidence }}%</div>
+                    <p class="mb-0">
+                        {% if analysis.ai_confidence >= 75 %}
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                            High confidence of AI-generated content.
+                        {% elif analysis.ai_confidence >= 40 %}
+                            <i class="fas fa-info-circle text-info me-2"></i>
+                            Moderate confidence of AI-generated content.
+                        {% else %}
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Low confidence of AI-generated content.
+                        {% endif %}
+                    </p>
+                    <small class="text-muted d-block mt-2">
+                        Note: This is a model confidence estimate (0-100%). It indicates how sure the analyzer is that this resume contains AI-generated text.
+                    </small>
+                </div>
+            </div>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-title">Readability Score</div>
+                    <div class="feature-value">{{ "%.1f"|format(analysis.features.readability) }}</div>
+                    <small class="text-muted">Flesch Reading Ease</small>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">AI Phrases Detected</div>
+                    <div class="feature-value">{{ analysis.features.ai_phrases }}</div>
+                    <small class="text-muted">Common AI expressions</small>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">Sentiment Neutrality</div>
+                    <div class="feature-value">{{ "%.2f"|format(analysis.features.sentiment_neutrality) }}</div>
+                    <small class="text-muted">0.0 = Emotional, 1.0 = Neutral</small>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">Burstiness Score</div>
+                    <div class="feature-value">{{ "%.2f"|format(analysis.features.burstiness) }}</div>
+                    <small class="text-muted">Sentence length variation</small>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">Perplexity Score</div>
+                    <div class="feature-value">{{ "%.2f"|format(analysis.features.perplexity) }}</div>
+                    <small class="text-muted">Language predictability</small>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">Grammar Errors</div>
+                    <div class="feature-value">{{ analysis.features.grammar_errors }}</div>
+                    <small class="text-muted">Detected inconsistencies</small>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">Entropy Score</div>
+                    <div class="feature-value">{{ "%.2f"|format(analysis.features.entropy_score) }}</div>
+                    <small class="text-muted">Character predictability</small>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">Bullet Score</div>
+                    <div class="feature-value">{{ "%.2f"|format(analysis.features.bullet_score) }}</div>
+                    <small class="text-muted">Bullet point usage</small>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-title">Stopword Ratio</div>
+                    <div class="feature-value">{{ "%.2f"|format(analysis.features.stopword_ratio) }}</div>
+                    <small class="text-muted">Frequency of common words</small>
+                </div>
+            </div>
+            <div class="alert alert-info mt-4">
+                <h6><i class="fas fa-info-circle me-2"></i>How AI Detection Works</h6>
+                <p class="mb-0">
+                    Our AI detection algorithm analyzes multiple linguistic features including writing patterns,
+                    phrase usage, sentiment neutrality, and grammatical perfection to determine the likelihood
+                    that content was generated by an AI system.
+                </p>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
